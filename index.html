@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 Daily Brain Training</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+<!-- ══════════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════════ -->
+<div id="s-home" class="screen active">
+
+  <div class="home-hero">
+    <span class="home-emoji">🧠</span>
+    <h1>Brain Training</h1>
+    <p class="home-subtitle">Daily cognitive exercises · 30 min sessions</p>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="h-streak">0</div>
+      <div class="stat-label">Day Streak 🔥</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="h-sessions">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="h-accuracy">—</div>
+      <div class="stat-label">Best Acc.</div>
+    </div>
+  </div>
+
+  <!-- Difficulty selector -->
+  <div style="margin-top:24px">
+    <div class="section-label">Difficulty</div>
+    <div class="difficulty-grid">
+      <button class="diff-btn sel" data-d="easy">
+        <span class="d-icon">🌱</span>
+        <span class="d-name">Easy</span>
+        <span class="d-desc">Build confidence</span>
+      </button>
+      <button class="diff-btn" data-d="medium">
+        <span class="d-icon">⚡</span>
+        <span class="d-name">Medium</span>
+        <span class="d-desc">Real challenge</span>
+      </button>
+      <button class="diff-btn" data-d="hard">
+        <span class="d-icon">🔥</span>
+        <span class="d-name">Hard</span>
+        <span class="d-desc">Push limits</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Start button -->
+  <div style="margin-top:20px">
+    <div id="h-played" class="played-today" style="display:none">
+      ✅ You already trained today — great consistency!
+    </div>
+    <button class="btn btn-primary btn-large btn-full" id="btn-start">
+      ▶ Start 30-Min Session
+    </button>
+  </div>
+
+  <!-- Category overview -->
+  <div class="card" style="margin-top:24px">
+    <div class="section-label" style="margin-bottom:14px">What you'll train</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="cat-item">
+        <span class="cat-icon">🔢</span>
+        <div class="cat-text"><strong>Mental Math</strong>Arithmetic under time pressure — no calculator</div>
+      </div>
+      <div class="cat-item">
+        <span class="cat-icon">🧩</span>
+        <div class="cat-text"><strong>Working Memory</strong>Memorize digit sequences, then recall them</div>
+      </div>
+      <div class="cat-item">
+        <span class="cat-icon">🔍</span>
+        <div class="cat-text"><strong>Pattern Recognition</strong>Find what comes next in number sequences</div>
+      </div>
+      <div class="cat-item">
+        <span class="cat-icon">📝</span>
+        <div class="cat-text"><strong>Word Recall</strong>Memorize a list of words and retrieve them</div>
+      </div>
+      <div class="cat-item">
+        <span class="cat-icon">🗣️</span>
+        <div class="cat-text"><strong>Articulation</strong>Verbal fluency sprints, synonym matching &amp; word unscramble</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #s-home -->
+
+
+<!-- ══════════════════════════════════════════
+     SESSION SCREEN
+══════════════════════════════════════════ -->
+<div id="s-session" class="screen">
+
+  <!-- Header: timer / score / end -->
+  <div class="session-header">
+    <div class="session-timer" id="sess-timer">30:00</div>
+    <div class="session-score">Score: <span id="sess-score">0</span></div>
+    <button class="end-btn" id="btn-end">End</button>
+  </div>
+
+  <!-- Overall session progress bar -->
+  <div class="progress-track">
+    <div class="progress-fill" id="sess-progress" style="width:0%"></div>
+  </div>
+
+  <!-- ── Memorize Phase ── -->
+  <div class="challenge-card" id="ph-memorize" style="display:none">
+    <div class="cat-badge" id="mem-badge"></div>
+    <div class="ch-prompt" id="mem-instruction"></div>
+    <div class="mem-phase">
+      <div id="mem-content"></div>
+      <div class="mem-countdown" id="mem-count"></div>
+    </div>
+  </div>
+
+  <!-- ── Answer Phase ── -->
+  <div class="challenge-card" id="ph-answer" style="display:none">
+    <div class="cat-badge" id="ans-badge"></div>
+    <div class="ch-prompt" id="ch-prompt"></div>
+    <div class="ch-main"   id="ch-main"></div>
+    <div class="ch-hint"   id="ch-hint" style="display:none"></div>
+
+    <div class="answer-section">
+
+      <!-- Text input (used for math / memory / pattern / words / unscramble / cat-sprint) -->
+      <div id="text-input-area">
+        <input
+          id="ans-input"
+          class="answer-input"
+          type="text"
+          placeholder="Your answer…"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <!-- Chips appear here during a category sprint -->
+        <div class="sprint-chips" id="sprint-chips" style="display:none"></div>
+        <div class="timer-bar">
+          <div class="timer-track"><div class="timer-fill" id="ch-timer-fill"></div></div>
+          <div class="timer-count" id="ch-timer-num">30</div>
+        </div>
+        <button class="btn btn-success btn-full" id="btn-submit" style="margin-top:12px">
+          Submit ↵
+        </button>
+      </div>
+
+      <!-- Multiple-choice grid (used for synonym challenges) -->
+      <div id="choice-input-area" style="display:none">
+        <div class="timer-bar" style="margin-bottom:14px">
+          <div class="timer-track"><div class="timer-fill" id="ch-timer-fill2"></div></div>
+          <div class="timer-count" id="ch-timer-num2">20</div>
+        </div>
+        <div class="choice-grid" id="choice-grid"></div>
+      </div>
+
+    </div>
+  </div><!-- #ph-answer -->
+
+  <!-- ── Feedback Phase ── -->
+  <div class="feedback-card" id="ph-feedback" style="display:none">
+    <div class="fb-icon"   id="fb-icon"></div>
+    <div class="fb-text"   id="fb-text"></div>
+    <div class="fb-answer" id="fb-answer" style="display:none"></div>
+    <div class="fb-points" id="fb-points" style="display:none"></div>
+    <div class="fb-words"  id="fb-words"  style="display:none"></div>
+  </div>
+
+</div><!-- #s-session -->
+
+
+<!-- ══════════════════════════════════════════
+     SUMMARY SCREEN
+══════════════════════════════════════════ -->
+<div id="s-summary" class="screen">
+
+  <div class="sum-hero">
+    <span class="sum-emoji" id="sum-emoji">🎉</span>
+    <h2 id="sum-title">Session Complete!</h2>
+    <div class="sum-score" id="sum-pts">0</div>
+    <div class="sum-score-lbl">Total Points</div>
+  </div>
+
+  <div class="sum-grid">
+    <div class="sum-stat">
+      <div class="sum-stat-val" id="sum-acc"    style="color:var(--success)">0%</div>
+      <div class="sum-stat-lbl">Accuracy</div>
+    </div>
+    <div class="sum-stat">
+      <div class="sum-stat-val" id="sum-chal"   style="color:var(--accent)">0</div>
+      <div class="sum-stat-lbl">Challenges</div>
+    </div>
+    <div class="sum-stat">
+      <div class="sum-stat-val" id="sum-streak" style="color:var(--warning)">0 🔥</div>
+      <div class="sum-stat-lbl">Day Streak</div>
+    </div>
+    <div class="sum-stat">
+      <div class="sum-stat-val" id="sum-time"   style="color:var(--muted)">—</div>
+      <div class="sum-stat-lbl">Time Played</div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="section-label" style="margin-bottom:12px">Category Breakdown</div>
+    <div id="bd-list"></div>
+  </div>
+
+  <div class="sum-actions">
+    <button class="btn btn-primary btn-full" id="btn-again">▶ Play Again</button>
+    <button class="btn btn-ghost  btn-full" id="btn-home">← Back to Home</button>
+  </div>
+
+</div><!-- #s-summary -->
+
+</div><!-- #app -->
+
+<script src="app.js"></script>
+</body>
+</html>
