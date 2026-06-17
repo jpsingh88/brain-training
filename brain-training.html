@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 Daily Brain Training</title>
+<style>
+:root {
+  --bg: #0d0d1a;
+  --surface: #1a1a2e;
+  --card: #1e1e3a;
+  --border: #2a2a4a;
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --success: #43e97b;
+  --warning: #f7971e;
+  --danger: #f64f59;
+  --text: #e8e8f0;
+  --muted: #8888aa;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+#app {
+  width: 100%;
+  max-width: 620px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px 40px;
+}
+h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+
+.screen { display: none; flex-direction: column; flex: 1; }
+.screen.active { display: flex; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 1rem; font-weight: 600; transition: all 0.15s; font-family: inherit;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #5a52e0; }
+.btn-success { background: var(--success); color: #0d0d1a; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+.btn-full { width: 100%; }
+.btn-large { padding: 18px 40px; font-size: 1.1rem; border-radius: 14px; }
+
+/* ── HOME ── */
+.home-hero { text-align: center; padding: 32px 0 20px; }
+.home-emoji { font-size: 3.5rem; display: block; margin-bottom: 12px; }
+.home-subtitle { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; text-align: center; }
+.stat-value { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 0.72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.section-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; }
+
+.difficulty-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.diff-btn {
+  padding: 14px 8px; border-radius: 12px; border: 2px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; text-align: center;
+  transition: all 0.15s; font-family: inherit;
+}
+.diff-btn .d-icon { font-size: 1.4rem; display: block; margin-bottom: 5px; }
+.diff-btn .d-name { font-size: 0.88rem; font-weight: 700; display: block; }
+.diff-btn .d-desc { font-size: 0.7rem; color: var(--muted); display: block; margin-top: 2px; }
+.diff-btn:hover { border-color: var(--accent); color: var(--text); }
+.diff-btn.sel { border-color: var(--accent); background: rgba(108,99,255,0.12); color: var(--text); }
+.diff-btn.sel .d-name { color: var(--accent); }
+
+.played-today {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: rgba(67,233,123,0.08); border: 1px solid rgba(67,233,123,0.25);
+  border-radius: 10px; font-size: 0.85rem; color: var(--success); margin-bottom: 12px;
+}
+
+.cat-item { display: flex; align-items: flex-start; gap: 12px; font-size: 0.88rem; color: var(--muted); line-height: 1.4; }
+.cat-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.cat-text strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 1px; }
+
+/* ── SESSION HEADER ── */
+.session-header {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; flex-shrink: 0;
+}
+.session-timer { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
+.session-timer.urgent { color: var(--danger); animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+.session-score { font-size: 1rem; font-weight: 700; }
+.session-score span { color: var(--accent); }
+.end-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.78rem;
+  font-family: inherit; transition: all 0.15s;
+}
+.end-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.progress-track { height: 4px; background: var(--border); border-radius: 4px; margin-bottom: 16px; overflow: hidden; flex-shrink: 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 1s linear; }
+
+/* ── CHALLENGE CARD ── */
+.challenge-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 28px 24px; flex: 1; display: flex; flex-direction: column;
+}
+.cat-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+  margin-bottom: 20px; align-self: flex-start; letter-spacing: 0.3px;
+}
+.b-math    { background: rgba(108,99,255,0.18); color: #a69cff; border: 1px solid rgba(108,99,255,0.3); }
+.b-memory  { background: rgba(255,101,132,0.18); color: #ff9ab0; border: 1px solid rgba(255,101,132,0.3); }
+.b-pattern { background: rgba(247,151,30,0.18);  color: #ffc46a; border: 1px solid rgba(247,151,30,0.3); }
+.b-words   { background: rgba(67,233,123,0.18);  color: #7fefaa; border: 1px solid rgba(67,233,123,0.3); }
+.b-articulation { background: rgba(236,72,153,0.18); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.3); }
+
+.ch-prompt { font-size: 0.88rem; color: var(--muted); margin-bottom: 10px; }
+.ch-main { font-size: 2.4rem; font-weight: 800; line-height: 1.2; margin-bottom: 24px; letter-spacing: -0.5px; }
+.ch-hint { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 16px; margin-top: -14px; }
+
+/* Memorize */
+.mem-phase { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; justify-content: center; }
+.mem-sequence { font-size: 3.8rem; font-weight: 900; letter-spacing: 14px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.mem-words { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.word-chip { background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3); padding: 10px 18px; border-radius: 10px; font-size: 1rem; font-weight: 500; }
+.mem-countdown { font-size: 0.85rem; color: var(--muted); }
+.mem-countdown span { color: var(--warning); font-weight: 700; }
+
+/* Answer inputs */
+.answer-section { margin-top: auto; }
+.answer-input {
+  width: 100%; background: rgba(255,255,255,0.04); border: 2px solid var(--border);
+  border-radius: 12px; padding: 16px 20px; font-size: 1.3rem; color: var(--text);
+  font-family: inherit; outline: none; transition: border-color 0.15s; text-align: center;
+}
+.answer-input.word-input { text-align: left; font-size: 1rem; }
+.answer-input:focus { border-color: var(--accent); }
+.answer-input.is-correct { border-color: var(--success); background: rgba(67,233,123,0.05); }
+.answer-input.is-wrong { border-color: var(--danger); background: rgba(246,79,89,0.05); }
+
+.timer-bar { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.timer-track { flex: 1; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.timer-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 1s linear, background 0.3s; }
+.timer-fill.warn { background: var(--warning); }
+.timer-fill.dang { background: var(--danger); }
+.timer-count { font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--muted); min-width: 22px; text-align: right; }
+
+/* Multiple choice grid */
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choice-btn {
+  padding: 16px 12px; border-radius: 12px; border: 2px solid var(--border);
+  background: rgba(255,255,255,0.03); color: var(--text); cursor: pointer;
+  font-size: 0.95rem; font-weight: 600; font-family: inherit; text-align: center;
+  transition: all 0.15s; line-height: 1.3;
+}
+.choice-btn:hover { border-color: var(--accent2); background: rgba(108,99,255,0.1); }
+.choice-btn.correct { border-color: var(--success); background: rgba(67,233,123,0.15); color: var(--success); }
+.choice-btn.wrong { border-color: var(--danger); background: rgba(246,79,89,0.1); color: var(--danger); }
+.choice-btn:disabled { cursor: default; }
+.choice-btn:disabled:not(.correct):not(.wrong) { opacity: 0.4; }
+
+/* Category sprint chip display */
+.sprint-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 36px; }
+.sprint-chip { background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; color: #f9a8d4; }
+
+/* Feedback */
+.feedback-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 40px 28px; flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px; text-align: center;
+}
+.fb-icon { font-size: 3.5rem; }
+.fb-text { font-size: 1.3rem; font-weight: 700; }
+.fb-correct { color: var(--success); }
+.fb-wrong { color: var(--danger); }
+.fb-answer { font-size: 0.92rem; color: var(--muted); }
+.fb-points { font-size: 1.6rem; font-weight: 800; color: var(--success); }
+.fb-words { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.fw { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; }
+.fw-got  { background: rgba(67,233,123,0.15); color: var(--success); border: 1px solid rgba(67,233,123,0.25); }
+.fw-miss { background: rgba(246,79,89,0.1); color: var(--danger); border: 1px solid rgba(246,79,89,0.2); text-decoration: line-through; opacity: 0.7; }
+
+/* ── SUMMARY ── */
+.sum-hero { text-align: center; padding: 28px 0 16px; }
+.sum-emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+.sum-score { font-size: 3.8rem; font-weight: 900; color: var(--accent); }
+.sum-score-lbl { font-size: 0.88rem; color: var(--muted); margin-top: 4px; }
+
+.sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.sum-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.sum-stat-val { font-size: 1.6rem; font-weight: 800; }
+.sum-stat-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+.bd-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.bd-item:last-child { border: none; }
+.bd-icon { font-size: 1.2rem; }
+.bd-name { flex: 1; font-size: 0.88rem; }
+.bd-track { flex: 2; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.bd-fill { height: 100%; border-radius: 4px; }
+.bd-pct { font-size: 0.9rem; font-weight: 700; min-width: 38px; text-align: right; }
+
+.sum-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ HOME ══ -->
+<div id="s-home" class="screen active">
+  <div class="home-hero">
+    <span class="home-emoji">🧠</span>
+    <h1>Brain Training</h1>
+    <p class="home-subtitle">Daily cognitive exercises · 30 min sessions</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value" id="h-streak">0</div><div class="stat-label">Day Streak 🔥</div></div>
+    <div class="stat-card"><div class="stat-value" id="h-sessions">0</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-card"><div class="stat-value" id="h-accuracy">—</div><div class="stat-label">Best Acc.</div></div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="section-label">Difficulty</div>
+    <div class="difficulty-grid">
+      <button class="diff-btn sel" data-d="easy"><span class="d-icon">🌱</span><span class="d-name">Easy</span><span class="d-desc">Build confidence</span></button>
+      <button class="diff-btn" data-d="medium"><span class="d-icon">⚡</span><span class="d-name">Medium</span><span class="d-desc">Real challenge</span></button>
+      <button class="diff-btn" data-d="hard"><span class="d-icon">🔥</span><span class="d-name">Hard</span><span class="d-desc">Push limits</span></button>
+    </div>
+  </div>
+
+  <div style="margin-top:20px">
+    <div id="h-played" class="played-today" style="display:none">✅ You already trained today — great consistency!</div>
+    <button class="btn btn-primary btn-large btn-full" id="btn-start">▶ Start 30-Min Session</button>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <div class="section-label" style="margin-bottom:14px">What you'll train</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="cat-item"><span class="cat-icon">🔢</span><div class="cat-text"><strong>Mental Math</strong>Arithmetic under time pressure — no calculator</div></div>
+      <div class="cat-item"><span class="cat-icon">🧩</span><div class="cat-text"><strong>Working Memory</strong>Memorize digit sequences, then recall them</div></div>
+      <div class="cat-item"><span class="cat-icon">🔍</span><div class="cat-text"><strong>Pattern Recognition</strong>Find what comes next in number sequences</div></div>
+      <div class="cat-item"><span class="cat-icon">📝</span><div class="cat-text"><strong>Word Recall</strong>Memorize a list of words and retrieve them</div></div>
+      <div class="cat-item"><span class="cat-icon">🗣️</span><div class="cat-text"><strong>Articulation</strong>Verbal fluency sprints, synonym matching & word unscramble</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SESSION ══ -->
+<div id="s-session" class="screen">
+  <div class="session-header">
+    <div class="session-timer" id="sess-timer">30:00</div>
+    <div class="session-score">Score: <span id="sess-score">0</span></div>
+    <button class="end-btn" id="btn-end">End</button>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="sess-progress" style="width:0%"></div></div>
+
+  <!-- Memorize Phase -->
+  <div class="challenge-card" id="ph-memorize" style="display:none">
+    <div class="cat-badge" id="mem-badge"></div>
+    <div class="ch-prompt" id="mem-instruction"></div>
+    <div class="mem-phase">
+      <div id="mem-content"></div>
+      <div class="mem-countdown" id="mem-count"></div>
+    </div>
+  </div>
+
+  <!-- Answer Phase -->
+  <div class="challenge-card" id="ph-answer" style="display:none">
+    <div class="cat-badge" id="ans-badge"></div>
+    <div class="ch-prompt" id="ch-prompt"></div>
+    <div class="ch-main" id="ch-main"></div>
+    <div class="ch-hint" id="ch-hint" style="display:none"></div>
+    <div class="answer-section">
+      <!-- Text input (math / memory / pattern / words / unscramble / cat-sprint) -->
+      <div id="text-input-area">
+        <input id="ans-input" class="answer-input" type="text" placeholder="Your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+        <div class="sprint-chips" id="sprint-chips" style="display:none"></div>
+        <div class="timer-bar">
+          <div class="timer-track"><div class="timer-fill" id="ch-timer-fill"></div></div>
+          <div class="timer-count" id="ch-timer-num">30</div>
+        </div>
+        <button class="btn btn-success btn-full" id="btn-submit" style="margin-top:12px">Submit ↵</button>
+      </div>
+      <!-- Multiple choice (synonym) -->
+      <div id="choice-input-area" style="display:none">
+        <div class="timer-bar" style="margin-bottom:14px">
+          <div class="timer-track"><div class="timer-fill" id="ch-timer-fill2"></div></div>
+          <div class="timer-count" id="ch-timer-num2">20</div>
+        </div>
+        <div class="choice-grid" id="choice-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Phase -->
+  <div class="feedback-card" id="ph-feedback" style="display:none">
+    <div class="fb-icon" id="fb-icon"></div>
+    <div class="fb-text" id="fb-text"></div>
+    <div class="fb-answer" id="fb-answer" style="display:none"></div>
+    <div class="fb-points" id="fb-points" style="display:none"></div>
+    <div class="fb-words" id="fb-words" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══ SUMMARY ══ -->
+<div id="s-summary" class="screen">
+  <div class="sum-hero">
+    <span class="sum-emoji" id="sum-emoji">🎉</span>
+    <h2 id="sum-title">Session Complete!</h2>
+    <div class="sum-score" id="sum-pts">0</div>
+    <div class="sum-score-lbl">Total Points</div>
+  </div>
+  <div class="sum-grid">
+    <div class="sum-stat"><div class="sum-stat-val" id="sum-acc" style="color:var(--success)">0%</div><div class="sum-stat-lbl">Accuracy</div></div>
+    <div class="sum-stat"><div class="sum-stat-val" id="sum-chal" style="color:var(--accent)">0</div><div class="sum-stat-lbl">Challenges</div></div>
+    <div class="sum-stat"><div class="sum-stat-val" id="sum-streak" style="color:var(--warning)">0 🔥</div><div class="sum-stat-lbl">Day Streak</div></div>
+    <div class="sum-stat"><div class="sum-stat-val" id="sum-time" style="color:var(--muted)">—</div><div class="sum-stat-lbl">Time Played</div></div>
+  </div>
+  <div style="margin-top:24px">
+    <div class="section-label" style="margin-bottom:12px">Category Breakdown</div>
+    <div id="bd-list"></div>
+  </div>
+  <div class="sum-actions">
+    <button class="btn btn-primary btn-full" id="btn-again">▶ Play Again</button>
+    <button class="btn btn-ghost btn-full" id="btn-home">← Back to Home</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+const SESSION_SECS = 30 * 60;
+
+const CATS = ['math','memory','pattern','words','articulation'];
+const CAT_CFG = {
+  math:         { name: 'Mental Math',         icon: '🔢', cls: 'b-math'        },
+  memory:       { name: 'Working Memory',      icon: '🧩', cls: 'b-memory'      },
+  pattern:      { name: 'Pattern Recognition', icon: '🔍', cls: 'b-pattern'     },
+  words:        { name: 'Word Recall',         icon: '📝', cls: 'b-words'       },
+  articulation: { name: 'Articulation',        icon: '🗣️', cls: 'b-articulation'},
+};
+const BD_COLORS = {
+  math:'#a69cff', memory:'#ff9ab0', pattern:'#ffc46a', words:'#7fefaa', articulation:'#f9a8d4'
+};
+
+// ── WORD DATA ──
+const WORD_BANK = {
+  easy:   ['apple','house','river','cloud','music','bread','table','smile','light','water','green','phone','chair','grass','stone','ocean','paper','voice','black','eagle','tiger','happy','beach','night','flame','storm','dance','heart','dream','bridge'],
+  medium: ['journey','cabinet','whisper','balance','lantern','captain','harvest','crystal','thunder','blanket','silence','village','patient','compass','dolphin','horizon','miracle','courage','phantom','kingdom','mystery','fortune','liberty','shadow','fragile','ancient','glacier','pilgrim','current','venture'],
+  hard:   ['elaborate','momentum','synthesis','paradigm','ambiguous','eloquent','tangible','coherent','obsolete','pragmatic','resilient','skeptical','meticulous','ephemeral','intrinsic','plausible','intuitive','empirical','tenacious','arbitrary','culminate','discernible','exemplary','formidable','acquiesce'],
+};
+
+// ── ARTICULATION DATA ──
+const CAT_LISTS = {
+  easy: [
+    { name:'Animals', words:['dog','cat','bird','fish','lion','tiger','elephant','monkey','rabbit','horse','cow','pig','sheep','duck','chicken','bear','wolf','fox','deer','frog','snake','turtle','parrot','eagle','owl','dolphin','whale','shark','crab','ant','bee','fly','goat','donkey','camel','penguin','koala','panda','giraffe','hippo'] },
+    { name:'Fruits',  words:['apple','banana','orange','grape','mango','pear','peach','plum','cherry','lemon','lime','melon','kiwi','fig','coconut','papaya','strawberry','blueberry','raspberry','pineapple','avocado','watermelon','pomegranate','apricot','nectarine','guava','lychee','passion fruit','dragonfruit'] },
+    { name:'Sports',  words:['soccer','football','basketball','tennis','cricket','baseball','golf','swimming','boxing','running','cycling','skiing','surfing','wrestling','badminton','volleyball','hockey','rugby','rowing','gymnastics','archery','karate','judo','fencing','polo','squash','lacrosse','handball','snooker'] },
+    { name:'Colors',  words:['red','blue','green','yellow','orange','purple','pink','black','white','brown','gray','teal','gold','silver','maroon','navy','cyan','magenta','indigo','violet','turquoise','beige','ivory','scarlet','crimson','azure','jade','olive','coral','salmon'] },
+  ],
+  medium: [
+    { name:'Kitchen items',   words:['knife','fork','spoon','plate','bowl','cup','pan','pot','oven','fridge','blender','toaster','microwave','kettle','spatula','colander','whisk','grater','ladle','tongs','strainer','apron','cutting board','timer','rolling pin','measuring cup','mixing bowl','sieve','peeler','can opener'] },
+    { name:'Capital cities',  words:['london','paris','tokyo','berlin','rome','madrid','beijing','moscow','ottawa','canberra','delhi','cairo','oslo','stockholm','vienna','athens','lisbon','dublin','warsaw','seoul','ankara','bangkok','lima','nairobi','accra','bogota','jakarta','manila','santiago','amsterdam'] },
+    { name:'Emotions',        words:['happy','sad','angry','afraid','surprised','disgusted','anxious','excited','proud','ashamed','guilty','jealous','hopeful','lonely','confused','frustrated','content','bored','nervous','relieved','grateful','embarrassed','nostalgic','melancholy','euphoric','indifferent','overwhelmed','curious','inspired','disappointed'] },
+    { name:'Work tools/apps', words:['slack','email','jira','confluence','github','zoom','excel','powerpoint','google docs','trello','notion','figma','asana','salesforce','hubspot','tableau','snowflake','python','javascript','sql','api','dashboard','spreadsheet','calendar','database'] },
+  ],
+  hard: [
+    { name:'Words ending in -tion', words:['action','nation','station','motion','notion','emotion','devotion','location','vacation','education','creation','relation','solution','attention','intention','mention','question','direction','position','function','section','fiction','fraction','traction','ambition','tradition','transition','innovation','communication','celebration'] },
+    { name:'Abstract concepts', words:['love','freedom','justice','truth','beauty','peace','faith','hope','courage','wisdom','honor','pride','shame','guilt','joy','grief','anger','trust','doubt','loyalty','integrity','empathy','creativity','ambition','resilience','compassion','autonomy','identity','consciousness','morality'] },
+    { name:'Business/TAM terms', words:['onboarding','escalation','churn','retention','sla','nps','roadmap','integration','migration','adoption','enablement','stakeholder','cadence','bandwidth','alignment','deliverable','kpi','okr','pilot','poc','discovery','qbr','executive sponsor','data quality','api','webhook','catalog','ingestion','normalization','reconciliation'] },
+  ]
+};
+
+const SYNONYMS = {
+  easy: [
+    { word:'HAPPY',  ans:'Joyful',       opts:['Joyful','Sad','Angry','Bored'] },
+    { word:'FAST',   ans:'Quick',        opts:['Quick','Slow','Heavy','Quiet'] },
+    { word:'BRAVE',  ans:'Courageous',   opts:['Courageous','Timid','Lazy','Weak'] },
+    { word:'SMART',  ans:'Intelligent',  opts:['Intelligent','Dull','Clumsy','Loud'] },
+    { word:'BEGIN',  ans:'Start',        opts:['Start','End','Pause','Skip'] },
+    { word:'ANGRY',  ans:'Furious',      opts:['Furious','Calm','Happy','Tired'] },
+    { word:'KIND',   ans:'Gentle',       opts:['Gentle','Harsh','Rude','Loud'] },
+    { word:'QUIET',  ans:'Silent',       opts:['Silent','Noisy','Busy','Fast'] },
+  ],
+  medium: [
+    { word:'METICULOUS', ans:'Thorough',    opts:['Thorough','Reckless','Boring','Loud'] },
+    { word:'ELOQUENT',   ans:'Articulate',  opts:['Articulate','Mute','Clumsy','Dull'] },
+    { word:'RESILIENT',  ans:'Tough',       opts:['Tough','Fragile','Passive','Vague'] },
+    { word:'AMBIGUOUS',  ans:'Unclear',     opts:['Unclear','Obvious','Precise','Certain'] },
+    { word:'PRAGMATIC',  ans:'Practical',   opts:['Practical','Idealistic','Reckless','Vague'] },
+    { word:'CANDID',     ans:'Honest',      opts:['Honest','Deceptive','Shy','Aggressive'] },
+    { word:'VERBOSE',    ans:'Wordy',       opts:['Wordy','Concise','Silent','Brief'] },
+    { word:'CONCISE',    ans:'Brief',       opts:['Brief','Lengthy','Vague','Loud'] },
+  ],
+  hard: [
+    { word:'PERSPICACIOUS', ans:'Shrewd',         opts:['Shrewd','Naive','Reckless','Vague'] },
+    { word:'TENACIOUS',     ans:'Persistent',     opts:['Persistent','Fickle','Lazy','Gentle'] },
+    { word:'EPHEMERAL',     ans:'Fleeting',       opts:['Fleeting','Eternal','Heavy','Rigid'] },
+    { word:'EQUIVOCAL',     ans:'Ambiguous',      opts:['Ambiguous','Clear','Decisive','Simple'] },
+    { word:'LOQUACIOUS',    ans:'Talkative',      opts:['Talkative','Quiet','Reserved','Shy'] },
+    { word:'INVETERATE',    ans:'Habitual',       opts:['Habitual','Occasional','Novice','Rare'] },
+    { word:'SANGUINE',      ans:'Optimistic',     opts:['Optimistic','Gloomy','Nervous','Bitter'] },
+    { word:'LACONIC',       ans:'Brief',          opts:['Brief','Verbose','Dramatic','Loud'] },
+  ]
+};
+
+const SCRAMBLES = {
+  easy: [
+    { sc:'AELP', ans:'PALE', hint:'Light in color' },
+    { sc:'TALS', ans:'SALT', hint:'Table condiment' },
+    { sc:'EALM', ans:'MALE', hint:'Opposite of female' },
+    { sc:'ACEM', ans:'CAME', hint:'Arrived' },
+    { sc:'TASE', ans:'SEAT', hint:'A place to sit' },
+    { sc:'REAT', ans:'RATE', hint:'A speed or price' },
+    { sc:'ELTA', ans:'TALE', hint:'A story' },
+    { sc:'GELA', ans:'GALE', hint:'A strong wind' },
+    { sc:'NAEM', ans:'NAME', hint:'What you are called' },
+    { sc:'EALB', ans:'ABLE', hint:'Capable of doing something' },
+  ],
+  medium: [
+    { sc:'SLIENT',  ans:'LISTEN',  hint:'Pay attention to sound' },
+    { sc:'ELGINS',  ans:'SINGLE',  hint:'Not paired or grouped' },
+    { sc:'IGENUS',  ans:'GENIUS',  hint:'Exceptional intelligence' },
+    { sc:'LATSER',  ans:'ALERTS',  hint:'Warnings or notifications' },
+    { sc:'TRICHES', ans:'RICHEST', hint:'Most wealthy' },
+    { sc:'STEADR',  ans:'TRADES',  hint:'Buying and selling' },
+    { sc:'NITLEGS', ans:'GLISTEN', hint:'Shine with reflected light' },
+    { sc:'ROMATES', ans:'MAESTRO', hint:'A master conductor' },
+  ],
+  hard: [
+    { sc:'SLOTAUEB', ans:'ABSOLUTE', hint:'Complete and total' },
+    { sc:'NAKLBEST', ans:'BLANKETS', hint:'Warm bed covers' },
+    { sc:'PTCRASHE', ans:'CHAPTERS', hint:'Sections of a book' },
+    { sc:'NUMODECT', ans:'DOCUMENT', hint:'An official paper or file' },
+    { sc:'NATIMONU', ans:'MOUNTAIN', hint:'A large rocky hill' },
+    { sc:'LATBSEST', ans:'TABLETS',  hint:'Portable devices or pills' }, // 7 letters: TABLETS = T,A,B,L,E,T,S -> LATBEST -> actually let me fix this
+    { sc:'BBLASCRE', ans:'SCRABBLE', hint:'A popular word board game' },
+    { sc:'LPETHSAA', ans:'ASPHALT',  hint:'Road paving material' },  // 7 letters
+  ]
+};
+// Fix hard scrambles: verify letter counts
+// ABSOLUTE: A,B,S,O,L,U,T,E (8) -> SLOTAUEB: S,L,O,T,A,U,E,B ✓
+// BLANKETS: B,L,A,N,K,E,T,S (8) -> NAKLBEST: N,A,K,L,B,E,S,T ✓
+// CHAPTERS: C,H,A,P,T,E,R,S (8) -> PTCRASHE: P,T,C,R,A,S,H,E ✓
+// DOCUMENT: D,O,C,U,M,E,N,T (8) -> NUMODECT: N,U,M,O,D,E,C,T ✓
+// MOUNTAIN: M,O,U,N,T,A,I,N (8) -> NATIMONU: N,A,T,I,M,O,N,U ✓
+// SCRABBLE: S,C,R,A,B,B,L,E (8) -> BBLASCRE: B,B,L,A,S,C,R,E ✓
+
+// ── STATE ──
+let S = {
+  diff:'easy', phase:'idle',
+  sessLeft:SESSION_SECS, sessInterval:null,
+  chalLeft:30, chalLimit:30, chalInterval:null,
+  memTimeout:null, fbTimeout:null, memCountInterval:null,
+  challenge:null, catIdx:0, score:0, results:[],
+  startTime:null, sprintWords:[], choiceSelected:false,
+};
+
+// ── PERSISTENCE ──
+function load() { try { return JSON.parse(localStorage.getItem('btv3')||'{}'); } catch { return {}; } }
+function save(d) { try { localStorage.setItem('btv3',JSON.stringify(d)); } catch {} }
+function today() { return new Date().toISOString().slice(0,10); }
+function getStored() {
+  const d=load();
+  return { streak:d.streak||0, sessions:d.sessions||0, bestAcc:d.bestAcc||null, lastDate:d.lastDate||null, diff:d.diff||'easy' };
+}
+function recordSession(total,correct) {
+  const d=load(); const t=today();
+  const acc=total>0?Math.round(correct/total*100):0;
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(d.lastDate===yesterday) d.streak=(d.streak||0)+1;
+  else if(d.lastDate!==t) d.streak=1;
+  d.lastDate=t; d.sessions=(d.sessions||0)+1; d.bestAcc=Math.max(d.bestAcc||0,acc); d.diff=S.diff;
+  save(d); return { streak:d.streak, acc };
+}
+
+// ── HELPERS ──
+function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=ri(0,i);[a[i],a[j]]=[a[j],a[i]]; } return a; }
+function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+
+// ── GENERATORS ──
+function genMath(d) {
+  if(d==='easy'){
+    const t=['add','sub','mul'][ri(0,2)];
+    if(t==='add'){const a=ri(2,9),b=ri(2,9);return{cat:'math',q:`${a} + ${b}`,ans:String(a+b),tl:20};}
+    if(t==='sub'){const b=ri(2,9),a=ri(b,15);return{cat:'math',q:`${a} − ${b}`,ans:String(a-b),tl:20};}
+    const a=ri(2,9),b=ri(2,9);return{cat:'math',q:`${a} × ${b}`,ans:String(a*b),tl:25};
+  }
+  if(d==='medium'){
+    const t=['add2','sub2','mul','pct'][ri(0,3)];
+    if(t==='add2'){const a=ri(13,79),b=ri(13,79);return{cat:'math',q:`${a} + ${b}`,ans:String(a+b),tl:30};}
+    if(t==='sub2'){const b=ri(12,50),a=ri(b+10,99);return{cat:'math',q:`${a} − ${b}`,ans:String(a-b),tl:30};}
+    if(t==='mul'){const a=ri(6,12),b=ri(6,12);return{cat:'math',q:`${a} × ${b}`,ans:String(a*b),tl:25};}
+    const p=[10,20,25,50][ri(0,3)],base=ri(2,20)*10;return{cat:'math',q:`${p}% of ${base}`,ans:String(p*base/100),tl:35};
+  }
+  const t=['mul2','step','pct2','sq'][ri(0,3)];
+  if(t==='mul2'){const a=ri(11,25),b=ri(11,25);return{cat:'math',q:`${a} × ${b}`,ans:String(a*b),tl:50};}
+  if(t==='step'){const a=ri(2,9),b=ri(2,9),c=ri(2,9);return{cat:'math',q:`(${a} × ${b}) + ${c}`,ans:String(a*b+c),tl:35};}
+  if(t==='pct2'){const p=ri(1,9)*5,base=ri(10,40)*5;return{cat:'math',q:`${p}% of ${base}`,ans:String(p*base/100),tl:50};}
+  const n=ri(11,20);return{cat:'math',q:`${n}²`,ans:String(n*n),tl:45};
+}
+
+function genMemory(d) {
+  if(d==='easy'){const len=ri(4,5),seq=Array.from({length:len},()=>ri(1,9)).join('');return{cat:'memory',type:'digit',seq,displayMs:3500,prompt:'Type the digits you just saw',ans:seq,tl:20};}
+  if(d==='medium'){const len=ri(6,7),seq=Array.from({length:len},()=>ri(1,9)).join('');return{cat:'memory',type:'digit',seq,displayMs:4000,prompt:'Type the digits you just saw',ans:seq,tl:25};}
+  const len=ri(7,8),seq=Array.from({length:len},()=>ri(1,9)).join('');
+  const rev=seq.split('').reverse().join('');
+  return{cat:'memory',type:'digit-rev',seq,displayMs:5000,prompt:'Type the digits in REVERSE ORDER',ans:rev,tl:35};
+}
+
+function genPattern(d) {
+  if(d==='easy'){const s=ri(1,10),step=ri(2,8),seq=[0,1,2,3,4].map(i=>s+i*step);return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Find the common difference',tl:28};}
+  if(d==='medium'){
+    const t=['geo','fib','alt'][ri(0,2)];
+    if(t==='geo'){const s=ri(1,4),r=ri(2,3),seq=[0,1,2,3,4].map(i=>s*Math.pow(r,i));return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Each term is multiplied by the same number',tl:35};}
+    if(t==='fib'){const a=ri(1,4),b=ri(1,6),seq=[a,b];for(let i=2;i<5;i++)seq.push(seq[i-1]+seq[i-2]);return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Each term = sum of two previous',tl:35};}
+    const a0=ri(2,8),sA=ri(2,5),b0=ri(2,8),sB=ri(2,5),seq=[a0,b0,a0+sA,b0+sB,a0+2*sA,b0+2*sB];
+    return{cat:'pattern',q:`${seq.slice(0,5).join(', ')}, ?`,ans:String(seq[5]),hint:'Two interleaved sequences',tl:42};
+  }
+  const t=['sq','cube','primes','poly'][ri(0,3)];
+  if(t==='sq'){const off=ri(1,6),seq=[0,1,2,3,4].map(i=>(i+off)*(i+off));return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Perfect squares',tl:40};}
+  if(t==='cube'){const off=ri(1,4),seq=[0,1,2,3,4].map(i=>Math.pow(i+off,3));return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Perfect cubes',tl:45};}
+  if(t==='primes'){const s=ri(1,10),primes=[2,3,5,7,11],seq=[s];for(let i=0;i<4;i++)seq.push(seq[i]+primes[i]);return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Differences are prime numbers',tl:50};}
+  const c=ri(1,4),seq=[1,2,3,4,5].map(n=>n*n+n+c);return{cat:'pattern',q:`${seq.slice(0,4).join(', ')}, ?`,ans:String(seq[4]),hint:'Check second differences',tl:55};
+}
+
+function genWords(d) {
+  const counts={easy:4,medium:6,hard:8},ms={easy:8000,medium:11000,hard:14000},tl={easy:35,medium:50,hard:70};
+  const words=shuffle([...WORD_BANK[d]]).slice(0,counts[d]);
+  return{cat:'words',type:'words',words,displayMs:ms[d],prompt:'Type every word you remember',ans:words,tl:tl[d]};
+}
+
+function genArticulation(d) {
+  const t=['cat-sprint','synonym','unscramble'][ri(0,2)];
+  if(t==='cat-sprint'){
+    const lists=CAT_LISTS[d]; const picked=lists[ri(0,lists.length-1)];
+    return{cat:'articulation',type:'cat-sprint',categoryName:picked.name,validWords:picked.words,tl:45};
+  }
+  if(t==='synonym'){
+    const pool=shuffle([...SYNONYMS[d]]);const s=pool[0];
+    return{cat:'articulation',type:'synonym',word:s.word,ans:s.ans,opts:shuffle([...s.opts]),tl:d==='easy'?20:d==='medium'?18:15};
+  }
+  // unscramble
+  const pool=shuffle([...SCRAMBLES[d]]);const s=pool[0];
+  return{cat:'articulation',type:'unscramble',sc:s.sc,ans:s.ans,hint:s.hint,tl:d==='easy'?30:d==='medium'?35:45};
+}
+
+function makeChallenge(cat,d) {
+  switch(cat){
+    case 'math':         return genMath(d);
+    case 'memory':       return genMemory(d);
+    case 'pattern':      return genPattern(d);
+    case 'words':        return genWords(d);
+    case 'articulation': return genArticulation(d);
+  }
+}
+
+// ── SCORING ──
+function scoreIt(ch, input) {
+  if(ch.cat==='words'){
+    const typed=input.toLowerCase().split(/[\s,;]+/).map(w=>w.trim()).filter(Boolean);
+    const got=ch.ans.filter(w=>typed.includes(w.toLowerCase()));
+    const miss=ch.ans.filter(w=>!typed.includes(w.toLowerCase()));
+    return{correct:got.length===ch.ans.length,pts:got.length*15,got,miss,partial:got.length};
+  }
+  if(ch.type==='cat-sprint'){
+    // input = array of words already parsed
+    const typed=Array.isArray(input)?input:input.toLowerCase().split(/[\s,;]+/).map(w=>w.trim()).filter(Boolean);
+    const valid=ch.validWords; const got=typed.filter(w=>valid.includes(w.toLowerCase()));
+    const unique=[...new Set(got)];
+    const pts=unique.length*12;
+    return{correct:unique.length>0,pts,got:unique,miss:[],partial:unique.length,total:unique.length};
+  }
+  if(ch.type==='synonym'){
+    const correct=input===ch.ans;
+    const pts=correct?({easy:30,medium:50,hard:70}[S.diff]+Math.round(10*(S.chalLeft/S.chalLimit))):0;
+    return{correct,pts,got:[],miss:[],partial:correct?1:0};
+  }
+  // all others: exact string match
+  const correct=input.trim().toUpperCase()===ch.ans.toUpperCase();
+  let pts=0;
+  if(correct){
+    const base={easy:20,medium:35,hard:55}[S.diff];
+    pts=base+Math.round(base*0.5*(S.chalLeft/S.chalLimit));
+  }
+  return{correct,pts,got:[],miss:[],partial:correct?1:0};
+}
+
+// ── UI ──
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showPhase(id){
+  ['ph-memorize','ph-answer','ph-feedback'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display='none';});
+  const t=document.getElementById(id); if(t)t.style.display='flex';
+}
+function setBadge(elId,cat){ const el=document.getElementById(elId),c=CAT_CFG[cat]; el.textContent=c.icon+' '+c.name; el.className='cat-badge '+c.cls; }
+function updateHeader(){
+  const t=document.getElementById('sess-timer'); t.textContent=fmt(S.sessLeft);
+  t.className='session-timer'+(S.sessLeft<120?' urgent':'');
+  document.getElementById('sess-score').textContent=S.score;
+  document.getElementById('sess-progress').style.width=((1-S.sessLeft/SESSION_SECS)*100)+'%';
+}
+function updateChalTimer(fillId,numId){
+  const pct=S.chalLeft/S.chalLimit*100;
+  const f=document.getElementById(fillId);
+  if(f){f.style.width=pct+'%';f.className='timer-fill'+(pct>50?'':pct>25?' warn':' dang');}
+  const n=document.getElementById(numId); if(n) n.textContent=S.chalLeft;
+}
+
+// ── SESSION ──
+function startSession(){
+  S.sessLeft=SESSION_SECS; S.score=0; S.results=[]; S.catIdx=0; S.startTime=Date.now();
+  showScreen('s-session'); updateHeader();
+  clearInterval(S.sessInterval);
+  S.sessInterval=setInterval(()=>{ S.sessLeft--; updateHeader(); if(S.sessLeft<=0){clearInterval(S.sessInterval);endSession();} },1000);
+  nextChallenge();
+}
+
+function nextChallenge(){
+  const cat=CATS[S.catIdx%CATS.length]; S.catIdx++;
+  S.challenge=makeChallenge(cat,S.diff);
+  S.sprintWords=[];
+  const ch=S.challenge;
+  if(ch.type==='digit'||ch.type==='digit-rev'||ch.type==='words') startMemorize();
+  else startAnswer();
+}
+
+function startMemorize(){
+  S.phase='memorize'; showPhase('ph-memorize');
+  const ch=S.challenge; setBadge('mem-badge',ch.cat);
+  if(ch.type==='digit'||ch.type==='digit-rev'){
+    document.getElementById('mem-instruction').textContent=ch.type==='digit-rev'?'Memorize these digits — you\'ll type them BACKWARDS':'Memorize these digits';
+    document.getElementById('mem-content').innerHTML=`<div class="mem-sequence">${ch.seq}</div>`;
+  } else {
+    document.getElementById('mem-instruction').textContent='Memorize these words';
+    document.getElementById('mem-content').innerHTML=`<div class="mem-words">${ch.words.map(w=>`<span class="word-chip">${w}</span>`).join('')}</div>`;
+  }
+  let t=Math.ceil(ch.displayMs/1000);
+  const cel=document.getElementById('mem-count');
+  cel.innerHTML=`Disappears in <span>${t}s</span>`;
+  clearInterval(S.memCountInterval);
+  S.memCountInterval=setInterval(()=>{ t--; if(t>0)cel.innerHTML=`Disappears in <span>${t}s</span>`; else clearInterval(S.memCountInterval); },1000);
+  clearTimeout(S.memTimeout);
+  S.memTimeout=setTimeout(()=>{ clearInterval(S.memCountInterval); startAnswer(); },ch.displayMs);
+}
+
+function startAnswer(){
+  S.phase='answer'; showPhase('ph-answer');
+  const ch=S.challenge; setBadge('ans-badge',ch.cat);
+  S.choiceSelected=false;
+
+  const inp=document.getElementById('ans-input');
+  const textArea=document.getElementById('text-input-area');
+  const choiceArea=document.getElementById('choice-input-area');
+  const sprintChips=document.getElementById('sprint-chips');
+
+  inp.value=''; inp.className='answer-input';
+  sprintChips.style.display='none'; sprintChips.innerHTML='';
+
+  // Show/hide input modes
+  if(ch.type==='synonym'){
+    textArea.style.display='none'; choiceArea.style.display='block';
+    const grid=document.getElementById('choice-grid');
+    grid.innerHTML=ch.opts.map(o=>`<button class="choice-btn" data-opt="${o}">${o}</button>`).join('');
+    grid.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>handleChoice(btn.dataset.opt)));
+  } else {
+    textArea.style.display='block'; choiceArea.style.display='none';
+    if(ch.type==='cat-sprint'){
+      inp.className='answer-input word-input';
+      inp.placeholder=`${ch.categoryName}… type them separated by commas`;
+      sprintChips.style.display='flex';
+    } else if(ch.cat==='memory'){
+      inp.className='answer-input'; inp.placeholder='Type the digits…';
+    } else if(ch.cat==='words'){
+      inp.className='answer-input word-input'; inp.placeholder='apple, house, river…';
+    } else if(ch.type==='unscramble'){
+      inp.className='answer-input'; inp.placeholder='Type the word…';
+    } else {
+      inp.className='answer-input'; inp.placeholder='Answer…';
+    }
+  }
+
+  // Prompt / main / hint
+  const promptEl=document.getElementById('ch-prompt');
+  const mainEl=document.getElementById('ch-main');
+  const hintEl=document.getElementById('ch-hint');
+
+  if(ch.cat==='memory'){
+    promptEl.textContent=ch.prompt; mainEl.textContent=''; hintEl.style.display='none';
+  } else if(ch.cat==='words'){
+    promptEl.textContent=ch.prompt; mainEl.textContent=''; hintEl.style.display='none';
+  } else if(ch.type==='cat-sprint'){
+    promptEl.textContent='🗣️ Verbal Fluency Sprint';
+    mainEl.textContent=ch.categoryName;
+    hintEl.textContent='Type as many as you can — separated by commas. Each valid word scores!';
+    hintEl.style.display='block';
+  } else if(ch.type==='synonym'){
+    promptEl.textContent='Which word means the same as:';
+    mainEl.textContent=ch.word;
+    hintEl.style.display='none';
+  } else if(ch.type==='unscramble'){
+    promptEl.textContent='Unscramble these letters:';
+    mainEl.textContent=ch.sc.split('').join(' − ');
+    hintEl.textContent='Hint: '+ch.hint; hintEl.style.display='block';
+  } else {
+    promptEl.textContent=CAT_CFG[ch.cat].icon+' '+CAT_CFG[ch.cat].name;
+    mainEl.textContent=(ch.q||'')+' = ?';
+    hintEl.style.display=ch.hint?'block':'none';
+    if(ch.hint) hintEl.textContent=ch.hint;
+  }
+
+  // Timer
+  S.chalLimit=ch.tl||30; S.chalLeft=S.chalLimit;
+  updateChalTimer('ch-timer-fill','ch-timer-num');
+  updateChalTimer('ch-timer-fill2','ch-timer-num2');
+  clearInterval(S.chalInterval);
+  S.chalInterval=setInterval(()=>{
+    S.chalLeft--;
+    updateChalTimer('ch-timer-fill','ch-timer-num');
+    updateChalTimer('ch-timer-fill2','ch-timer-num2');
+    if(S.chalLeft<=0){ clearInterval(S.chalInterval); submitAnswer(true); }
+  },1000);
+
+  setTimeout(()=>{ if(ch.type!=='synonym') inp.focus(); },80);
+}
+
+function handleChoice(opt){
+  if(S.choiceSelected) return;
+  S.choiceSelected=true;
+  clearInterval(S.chalInterval);
+  const ch=S.challenge;
+  const res=scoreIt(ch,opt);
+  S.score+=res.pts;
+  S.results.push({cat:ch.cat,correct:res.correct,partial:res.partial,total:1,pts:res.pts});
+
+  // Visual feedback on buttons
+  document.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.disabled=true;
+    if(btn.dataset.opt===ch.ans) btn.classList.add('correct');
+    else if(btn.dataset.opt===opt&&!res.correct) btn.classList.add('wrong');
+  });
+  setTimeout(()=>showFeedback(ch,res,false),800);
+}
+
+// Sprint chip input
+document.getElementById('ans-input').addEventListener('keydown',function(e){
+  if(S.phase!=='answer') return;
+  const ch=S.challenge;
+  if(ch&&ch.type==='cat-sprint'){
+    if(e.key===','||e.key==='Enter'){
+      e.preventDefault();
+      const val=this.value.replace(/,/g,'').trim().toLowerCase();
+      if(val.length>1&&!S.sprintWords.includes(val)){
+        S.sprintWords.push(val);
+        const chip=document.createElement('span');
+        chip.className='sprint-chip'; chip.textContent=val;
+        document.getElementById('sprint-chips').appendChild(chip);
+      }
+      this.value='';
+    }
+  } else if(e.key==='Enter'){
+    submitAnswer(false);
+  }
+});
+
+function submitAnswer(timeUp=false){
+  clearInterval(S.chalInterval);
+  const ch=S.challenge;
+  if(ch.type==='synonym') return; // handled by handleChoice
+  let input;
+  if(ch.type==='cat-sprint'){
+    // Capture anything remaining in the input box
+    const remaining=document.getElementById('ans-input').value.replace(/,/g,'').trim().toLowerCase();
+    if(remaining.length>1&&!S.sprintWords.includes(remaining)) S.sprintWords.push(remaining);
+    input=S.sprintWords;
+  } else {
+    input=timeUp?'':document.getElementById('ans-input').value;
+  }
+  const res=scoreIt(ch,input);
+  S.score+=res.pts;
+  S.results.push({cat:ch.cat,correct:res.correct,partial:res.partial,total:ch.cat==='words'?ch.ans.length:ch.type==='cat-sprint'?Math.max(res.partial,1):1,pts:res.pts});
+  if(ch.cat!=='words'&&ch.type!=='cat-sprint'){ const inp=document.getElementById('ans-input'); inp.className='answer-input '+(res.correct?'is-correct':'is-wrong'); }
+  showFeedback(ch,res,timeUp);
+}
+
+function showFeedback(ch,res,timeUp){
+  S.phase='feedback'; showPhase('ph-feedback');
+  const icon=document.getElementById('fb-icon');
+  const text=document.getElementById('fb-text');
+  const ansEl=document.getElementById('fb-answer');
+  const ptsEl=document.getElementById('fb-points');
+  const wordsEl=document.getElementById('fb-words');
+
+  if(ch.cat==='words'){
+    const pct=Math.round(res.got.length/ch.ans.length*100);
+    icon.textContent=pct>=80?'✅':pct>=50?'👍':'❌';
+    text.textContent=`${res.got.length} / ${ch.ans.length} words recalled`;
+    text.className='fb-text '+(pct>=60?'fb-correct':'fb-wrong');
+    ansEl.style.display='none';
+    wordsEl.innerHTML=ch.ans.map(w=>{const got=res.got.includes(w);return`<span class="fw ${got?'fw-got':'fw-miss'}">${w}</span>`;}).join('');
+    wordsEl.style.display='flex';
+  } else if(ch.type==='cat-sprint'){
+    icon.textContent=res.partial>=8?'🔥':res.partial>=5?'✅':res.partial>=2?'👍':'❌';
+    text.textContent=`${res.partial} valid ${ch.categoryName.toLowerCase()} named`;
+    text.className='fb-text '+(res.partial>=5?'fb-correct':'fb-wrong');
+    ansEl.style.display='none';
+    if(res.got.length>0){
+      wordsEl.innerHTML=res.got.map(w=>`<span class="fw fw-got">${w}</span>`).join('');
+      wordsEl.style.display='flex';
+    } else { wordsEl.style.display='none'; }
+  } else if(timeUp&&!res.correct){
+    icon.textContent='⏰'; text.textContent="Time's up!"; text.className='fb-text fb-wrong';
+    ansEl.textContent=`Answer: ${ch.ans}`; ansEl.style.display='block'; wordsEl.style.display='none';
+  } else if(res.correct){
+    icon.textContent='✅'; text.textContent='Correct!'; text.className='fb-text fb-correct';
+    ansEl.style.display='none'; wordsEl.style.display='none';
+  } else {
+    icon.textContent='❌'; text.textContent='Not quite'; text.className='fb-text fb-wrong';
+    ansEl.textContent=`Answer: ${ch.ans}`; ansEl.style.display='block'; wordsEl.style.display='none';
+  }
+
+  ptsEl.style.display=res.pts>0?'block':'none';
+  if(res.pts>0) ptsEl.textContent=`+${res.pts} pts`;
+  updateHeader();
+  clearTimeout(S.fbTimeout);
+  S.fbTimeout=setTimeout(()=>{ if(S.sessLeft>0) nextChallenge(); },2500);
+}
+
+function endSession(){
+  clearInterval(S.sessInterval); clearInterval(S.chalInterval);
+  clearTimeout(S.memTimeout); clearTimeout(S.fbTimeout); clearInterval(S.memCountInterval);
+  const total=S.results.length, correct=S.results.filter(r=>r.correct).length;
+  const {streak,acc}=recordSession(total,correct);
+  const elapsed=Math.round((Date.now()-S.startTime)/1000);
+
+  document.getElementById('sum-pts').textContent=S.score;
+  document.getElementById('sum-acc').textContent=acc+'%';
+  document.getElementById('sum-chal').textContent=total;
+  document.getElementById('sum-streak').textContent=streak+' 🔥';
+  document.getElementById('sum-time').textContent=`${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+  document.getElementById('sum-emoji').textContent=acc>=80?'🎉':acc>=60?'💪':'🧠';
+  document.getElementById('sum-title').textContent=acc>=80?'Excellent Session!':acc>=60?'Good Work!':'Keep Practicing!';
+
+  const cs={}; CATS.forEach(c=>{ cs[c]={correct:0,total:0}; });
+  S.results.forEach(r=>{ cs[r.cat].total+=r.total||1; cs[r.cat].correct+=r.partial||0; });
+
+  document.getElementById('bd-list').innerHTML=CATS.map(c=>{
+    const s=cs[c]; const pct=s.total>0?Math.round(s.correct/s.total*100):null;
+    return`<div class="bd-item"><div class="bd-icon">${CAT_CFG[c].icon}</div><div class="bd-name">${CAT_CFG[c].name}</div><div class="bd-track"><div class="bd-fill" style="width:${pct??0}%;background:${BD_COLORS[c]}"></div></div><div class="bd-pct" style="color:${BD_COLORS[c]}">${pct!==null?pct+'%':'—'}</div></div>`;
+  }).join('');
+
+  showScreen('s-summary'); loadHomeStats();
+}
+
+// ── HOME ──
+function loadHomeStats(){
+  const d=getStored();
+  document.getElementById('h-streak').textContent=d.streak;
+  document.getElementById('h-sessions').textContent=d.sessions;
+  document.getElementById('h-accuracy').textContent=d.bestAcc!==null?d.bestAcc+'%':'—';
+  document.getElementById('h-played').style.display=d.lastDate===today()?'flex':'none';
+  setDiff(d.diff||'easy',false);
+}
+function setDiff(d,persist=true){
+  S.diff=d; document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('sel',b.dataset.d===d));
+  if(persist){const dd=load();dd.diff=d;save(dd);}
+}
+
+// ── EVENTS ──
+document.getElementById('btn-start').addEventListener('click',startSession);
+document.getElementById('btn-submit').addEventListener('click',()=>{ if(S.phase==='answer') submitAnswer(false); });
+document.getElementById('btn-end').addEventListener('click',()=>{ if(confirm('End session early? Your progress will be saved.')) endSession(); });
+document.getElementById('btn-again').addEventListener('click',startSession);
+document.getElementById('btn-home').addEventListener('click',()=>{ loadHomeStats(); showScreen('s-home'); });
+document.querySelectorAll('.diff-btn').forEach(b=>b.addEventListener('click',()=>setDiff(b.dataset.d)));
+
+loadHomeStats();
+</script>
+</body>
+</html>
