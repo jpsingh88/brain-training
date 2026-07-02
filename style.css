@@ -146,10 +146,20 @@ h2 { font-size: 1.4rem; font-weight: 700; }
 .b-pattern      { background: rgba(247,151,30,0.18);  color: #ffc46a; border: 1px solid rgba(247,151,30,0.3); }
 .b-words        { background: rgba(67,233,123,0.18);  color: #7fefaa; border: 1px solid rgba(67,233,123,0.3); }
 .b-articulation { background: rgba(236,72,153,0.18);  color: #f9a8d4; border: 1px solid rgba(236,72,153,0.3); }
+.b-phrase       { background: rgba(6,182,212,0.18);    color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); }
 
 .ch-prompt { font-size: 0.88rem; color: var(--muted); margin-bottom: 10px; }
 .ch-main   { font-size: 2.4rem; font-weight: 800; line-height: 1.2; margin-bottom: 24px; letter-spacing: -0.5px; }
 .ch-hint   { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 16px; margin-top: -14px; }
+
+/* ── Daily Phrase memorize card ── */
+.phrase-card { display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: center; }
+.phrase-headline { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.5px; color: #67e8f9; line-height: 1.2; }
+.phrase-meaning { font-size: 1rem; color: var(--muted); line-height: 1.6; }
+.phrase-examples { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.phrase-ex { font-size: 0.88rem; color: var(--text); line-height: 1.6; padding: 8px 12px; background: rgba(6,182,212,0.06); border-left: 3px solid rgba(6,182,212,0.4); border-radius: 0 8px 8px 0; }
+.phrase-ex em { color: #67e8f9; font-style: normal; font-weight: 600; }
+.phrase-num { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 
 /* ── Memorize Phase ── */
 .mem-phase { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; justify-content: center; }
